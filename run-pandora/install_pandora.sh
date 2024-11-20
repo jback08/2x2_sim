@@ -1,32 +1,12 @@
 #!/usr/bin/env bash
 
-export ARCUBE_RUNTIME=SHIFTER
-export ARCUBE_CONTAINER=fermilab/fnal-wn-sl7:latest
+source setup_pandora.sh
 
-source ../util/reload_in_container.inc.sh
-
-source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
-setup cmake v3_22_2
-setup gcc v9_3_0
-setup eigen v3_3_5
-setup hdf5 v1_10_5a -q e20
-# Sets ROOT version consistent with edepsim production version
-setup edepsim v3_2_0c -q e20:prof
-
-# Install directory
-export ARCUBE_PANDORA_BASEDIR=$PWD
-export ARCUBE_PANDORA_INSTALL=$ARCUBE_PANDORA_BASEDIR/install
+# Create install directory
+cd $ARCUBE_DIR
 mkdir -p $ARCUBE_PANDORA_INSTALL
 
-# Pandora package versions
-export ARCUBE_PANDORA_PFA_VERSION=v04-09-00
-export ARCUBE_PANDORA_SDK_VERSION=v03-04-01
-export ARCUBE_PANDORA_MONITORING_VERSION=v03-06-00
-export ARCUBE_PANDORA_LAR_CONTENT_VERSION=v04_11_00
-export ARCUBE_PANDORA_LAR_MLDATA_VERSION=v04-09-00
-export ARCUBE_PANDORA_LAR_RECO_ND_VERSION=master
-
-# PandoraPFA (cmake setup)
+# PandoraPFA (cmake files)
 cd $ARCUBE_PANDORA_INSTALL
 git clone https://github.com/PandoraPFA/PandoraPFA.git
 cd PandoraPFA
@@ -53,7 +33,7 @@ cmake -DCMAKE_MODULE_PATH="$ARCUBE_PANDORA_INSTALL/PandoraPFA/cmakemodules;$ROOT
 -DPandoraSDK_DIR=$ARCUBE_PANDORA_INSTALL/PandoraSDK ..
 make -j4 install
 
-# LArContent (Algorithms) without LibTorch (no Deep Learning Vertexing)
+# LArContent (algorithms) without LibTorch (no Deep Learning Vertexing)
 cd $ARCUBE_PANDORA_INSTALL
 git clone https://github.com/PandoraPFA/LArContent.git
 cd LArContent
@@ -79,12 +59,25 @@ cmake -DCMAKE_MODULE_PATH="$ARCUBE_PANDORA_INSTALL/PandoraPFA/cmakemodules;$ROOT
 -DLArContent_DIR=$ARCUBE_PANDORA_INSTALL/LArContent ..
 make -j4 install
 
-# LArMachineLearningData (for BDT files etc)
+# LArMachineLearningData (BDT, MVA & Deep Learning training files)
 cd $ARCUBE_PANDORA_INSTALL
 git clone https://github.com/PandoraPFA/LArMachineLearningData.git
 cd LArMachineLearningData
 git checkout $ARCUBE_PANDORA_LAR_MLDATA_VERSION
 # Download training files: only do this once to avoid google drive's access restrictions (up to 24 hrs wait)
-#. download.sh sbnd
-#. download.sh dune
-#. download.sh dunend
+. download.sh sbnd
+. download.sh dune
+. download.sh dunend
+
+# Install h5flow for converting HDF5 input files to ROOT for LArRecoND
+cd $ARCUBE_PANDORA_INSTALL
+git clone https://github.com/lbl-neutrino/h5flow.git
+echo "Setting up pandora.venv for h5flow"
+python3 -m venv pandora.venv
+source pandora.venv/bin/activate
+cd h5flow
+pip3 install .
+deactivate
+
+# Convert GDML geometry file to ROOT for LArRecoND
+root -l -b -q -e "TGeoManager::Import(\"${ARCUBE_GEOM}\"); gGeoManager->Export(\"${ARCUBE_PANDORA_GEOM}\");"
