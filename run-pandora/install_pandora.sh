@@ -79,5 +79,5 @@ cd h5flow
 pip3 install .
 deactivate
 
-# Convert GDML geometry file to ROOT for LArRecoND
-root -l -b -q -e "TGeoManager::Import(\"${ARCUBE_GEOM}\"); gGeoManager->Export(\"${ARCUBE_PANDORA_GEOM}\");"
+# Convert GDML geometry file to ROOT for LArRecoND (using cm length units)
+root -l -b -q -e "TGeoManager::LockDefaultUnits(kFALSE); TGeoManager::SetDefaultUnits(TGeoManager::kRootUnits); TGeoManager::Import(\"${ARCUBE_GEOM}\"); gGeoManager->Export(\"${ARCUBE_PANDORA_GEOM}\");"

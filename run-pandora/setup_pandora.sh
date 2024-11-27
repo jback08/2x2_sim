@@ -15,8 +15,8 @@ setup eigen v3_3_5
 setup edepsim v3_2_0c -q e20:prof
 
 # Install directory
-export ARCUBE_PANDORA_BASEDIR=$PWD
-export ARCUBE_PANDORA_INSTALL=$ARCUBE_PANDORA_BASEDIR/install
+export ARCUBE_PANDORA_BASEDIR=${PWD}
+export ARCUBE_PANDORA_INSTALL=${ARCUBE_PANDORA_BASEDIR}/install
 
 # Pandora package versions
 export ARCUBE_PANDORA_PFA_VERSION=v04-09-00
@@ -27,10 +27,16 @@ export ARCUBE_PANDORA_LAR_MLDATA_VERSION=v04-09-00
 export ARCUBE_PANDORA_LAR_RECO_ND_VERSION=master
 
 # Relative path used by Pandora packages
-export MY_TEST_AREA=$ARCUBE_PANDORA_INSTALL
+export MY_TEST_AREA=${ARCUBE_PANDORA_INSTALL}
+# Set FW_SEARCH_PATH for Pandora xml run files & machine learning data etc
+export FW_SEARCH_PATH=${MY_TEST_AREA}/LArRecoND/settings
+export FW_SEARCH_PATH=${MY_TEST_AREA}/LArMachineLearningData:${FW_SEARCH_PATH}
 
 # Geometry GDML file
 GDMLName='Merged2x2MINERvA_v4_withRock'
-export ARCUBE_GEOM=$ARCUBE_DIR/geometry/Merged2x2MINERvA_v4/${GDMLName}.gdml
-export ARCUBE_PANDORA_GEOM=$ARCUBE_PANDORA_INSTALL/LArRecoND/${GDMLName}.root
+export ARCUBE_GEOM=${ARCUBE_DIR}/geometry/Merged2x2MINERvA_v4/${GDMLName}.gdml
+export ARCUBE_PANDORA_GEOM=${ARCUBE_PANDORA_INSTALL}/LArRecoND/${GDMLName}.root
 echo "Geom: $ARCUBE_GEOM $ARCUBE_PANDORA_GEOM"
+
+# Specify LArRecoND input data format: SP (SpacePoint data) or SPMC (SpacePoint MC)
+export ARCUBE_PANDORA_INPUT_FORMAT=SPMC
