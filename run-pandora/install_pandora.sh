@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+export ARCUBE_RUNTIME=SHIFTER
+export ARCUBE_CONTAINER=fermilab/fnal-wn-sl7:latest
+export ARCUBE_DIR=$(realpath "$PWD"/..)
+
+source $ARCUBE_DIR/util/reload_in_container.inc.sh
+
 source setup_pandora.sh
 
 # Create install directory
